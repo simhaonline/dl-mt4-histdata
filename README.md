@@ -1,5 +1,4 @@
-
-#Script To Download Historical Data From MetaTrader4
+# Script To Download Historical Data From MetaTrader4
 
 To download the historical data of a symbol for a timeframe, add the symbol into symbols_list.csv and the timeframe into timeframes_list.csv. The script reads the required symbols and timeframes from the two files and will not work without them. Symbols and timeframes which are not valid or available will be ignored.
 
@@ -11,5 +10,5 @@ In the case the CSV file name exists, historical data for all the history bars a
 
 There is a download record, in the form of a CSV file, for each symbol. When the historical data of a symbol for a timeframe is downloaded, the following information is written into the download record: script start time, symbol, timeframe, earliest and latest datetime of the historical data.
 
-##Revising On:
+## Revising On:
 1. Logging
