@@ -1,36 +1,43 @@
 class CCSV
 {
     public:
-        void WriteArray(string fileName, ENUM_FILE_POSITION filePos, MqlRates& rates[]);
+        void ReadFirstLine(string fileName, string& firstLine[]);
         void ReadLastLine(string fileName, string& lastLine[]);
+        void WriteMqlRatesDtOHLC(string fileName, ENUM_FILE_POSITION filePos, MqlRates& rates[]);
 };
 
-void CCSV::WriteArray(string fileName, ENUM_FILE_POSITION filePos, MqlRates& rates[])
+// Read the first line of a csv file into the array passed by reference
+void CCSV::ReadFirstLine(string fileName,string& firstLine[])
 {
-    int handle = FileOpen(fileName, FILE_WRITE|FILE_CSV);
-    FileSeek(handle, 0, filePos);
+    int handle = FileOpen(fileName, FILE_READ|FILE_CSV);
+    FileSeek(handle, 0, SEEK_SET);
     
-    int numBars = ArraySize(rates);
-    for(int i = 0; i < numBars; i++)
+    int i = 0;
+    while(!FileIsLineEnding(handle))
     {
-        FileWrite(handle, rates[i].time, rates[i].open,
-                    rates[i].high, rates[i].low, rates[i].close);
+        ArrayResize(firstLine, ++i);
+        firstLine[i-1] = FileReadString(handle);
     }
     
     FileClose(handle);
 }
 
-void CCSV::ReadLastLine(string fileName,string &lastLine[])
+// Read the last line of a csv file into the array passed by reference
+void CCSV::ReadLastLine(string fileName,string& lastLine[])
 {
     int handle = FileOpen(fileName, FILE_READ|FILE_CSV);
+    FileSeek(handle, 0, SEEK_SET);
+    
     while(!FileIsEnding(handle))
     {
-        lastLine[0] = FileReadString(handle);
-        int i = 1;
+        int i = 0;
+        ArrayResize(lastLine, ++i);
+        lastLine[i-1] = FileReadString(handle);
+        
         while(!FileIsLineEnding(handle))
         {
-            lastLine[i] = FileReadString(handle);
-            i++;
+            ArrayResize(lastLine, ++i);
+            lastLine[i-1] = FileReadString(handle);
         }
     }
     
@@ -38,29 +45,19 @@ void CCSV::ReadLastLine(string fileName,string &lastLine[])
 }
 
 
-
-
-
-
-
-//    while(!FileIsEnding(fileHandle))
-//        {
-//
-//            //thisStr0 = thisStr1;
-//            //thisStr1 = thisStr2;
-//            //thisStr2 = thisStr3;
-//            //thisStr3 = thisStr4;
-//            //thisStr4 = FileReadString(fileHandle);
-//            
-//            Print(FileReadString(fileHandle));  // Put before while loop so that last execution is not an empty string
-//            
-//            //while(!FileIsLineEnding(fileHandle))
-//            //{
-//            //    FileReadString(fileHandle); // Read until the last field of the line
-//            //}
-//            
-//           // Print(FileReadString(fileHandle)); // Move to next line. Last execution is an empty string
-//
-//        }
-//    
-//    //Print(TimeToStr(thisStr0));
+// Write MqlRates array (DtOHLC) into a csv file from the earliest datetime to the latest datetime
+// Array indexing direction for rates[] should be from earliest to latest
+void CCSV::WriteMqlRatesDtOHLC(string fileName, ENUM_FILE_POSITION filePos, MqlRates& rates[])
+{
+    int handle = FileOpen(fileName, FILE_READ|FILE_WRITE|FILE_CSV);
+    FileSeek(handle, 0, filePos);
+    
+    int numBars = ArraySize(rates);
+    for(int i=0; i < numBars; i++)
+    {
+        FileWrite(handle, TimeToStr(rates[i].time), rates[i].open,
+                    rates[i].high, rates[i].low, rates[i].close);
+    }
+    
+    FileClose(handle);
+}
